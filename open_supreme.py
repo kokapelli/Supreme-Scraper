@@ -129,7 +129,7 @@ def init():
     regex = "Leather Tanker Jacket"
     rd = "04/11/2019"
     home_page = get_page()
-    shop_page = get_assortment(home_page, 1)
+    shop_page = get_assortment(home_page)
     item = find_item(shop_page, regex)
     end = datetime.datetime.now()
 

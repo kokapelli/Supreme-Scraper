@@ -23,6 +23,8 @@ def get_assortment(parsed_page, release=0):
     for i in shop_list.find_all('li'):
         if(release == 1 and get_tag(i) != None):
             items.append(i)
+        elif(release == 0):
+            items.append(i)
 
     return items
 

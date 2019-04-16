@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup as soup
 import queue as queue
 
 DEBUG = 0
-THREAD_NUM = 8
+THREAD_NUM = 1
 URL = "https://www.supremenewyork.com/shop"
 
 
@@ -129,7 +129,7 @@ def init():
     regex = "Leather Tanker Jacket"
     rd = "04/11/2019"
     home_page = get_page()
-    shop_page = get_assortment(home_page)
+    shop_page = get_assortment(home_page, 1) # Second paramter one fetches only new releases
 
     q = queue.Queue(maxsize=0)
 
