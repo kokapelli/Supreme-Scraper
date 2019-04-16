@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup as soup
 import queue as queue
 
 DEBUG = 0
-THREAD_NUM = 1
+THREAD_NUM = 8
 URL = "https://www.supremenewyork.com/shop"
 
 
@@ -107,11 +107,14 @@ def await_release(release_time=None):
 
 def find_item(item, regex):
     while True: 
-        query   = get_query(item.get())
-        product = get_page(query)
+        try:
+            query   = get_query(item.get())
+            product = get_page(query)
 
-        if re.findall(regex, str(product)):
-            init_checkout(query)
+            if re.findall(regex, str(product)):
+                init_checkout(query)
+        except:
+            print("Sold Out!")
 
         item.task_done()
 
@@ -124,12 +127,10 @@ def init_checkout(query):
     insert_info_checkout(driver)
 
 def init():
-    #init_driver(url) # Might not be necessary, means to not be locked out of client
-    # "Leather Tanker Jacket"
-    regex = "Leather Tanker Jacket"
+    regex = "Jean Paul"
     rd = "04/11/2019"
     home_page = get_page()
-    shop_page = get_assortment(home_page, 1) # Second paramter one fetches only new releases
+    shop_page = get_assortment(home_page, 1) # Second parameter one fetches only new releases
 
     q = queue.Queue(maxsize=0)
 
