@@ -15,9 +15,22 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup as soup
 import queue as queue
 
-DEBUG = 0
-THREAD_NUM = 8
 URL = "https://www.supremenewyork.com/shop"
+THREAD_NUM = 8
+ITEM = "Leather Tanker Jacket"
+RELEASE_DATE = "04/11/2019"
+FULL_NAME       = "Larsa Hasselbacke"
+EMAIL           = "larsa.hasselbacke@retard.com"
+TELE            = "112"
+ADDR            = "Rikspucko 69"
+CITY            = "Tuppsala"
+POST_CODE       = "75369"
+COUNTRY         = "swe"
+CARD_INFO       = '4539031065689519'
+CARD_MONTH      = '10'
+CARD_YEAR       = '20'
+CARD_CVV        = '930'
+
 
 
 START_TIME = datetime.datetime.now()
@@ -47,17 +60,6 @@ def checkout(driver):
     return driver
 
 def insert_info_checkout(driver):
-    full_name       = "Larsa Hasselbacke"
-    email           = "larsa.hasselbacke@retard.com"
-    tele            = "112"
-    addr            = "Rikspucko 69"
-    city            = "Tuppsala"
-    post_code       = "75369"
-    country         = "swe"
-    card_info       = '4539031065689519'
-    card_month      = '10'
-    card_year       = '20'
-    card_cvv        = '930'
 
     full_name_xpath = '//*[@id="order_billing_name"]'       # Query
     email_xpath     = '//*[@id="order_email"]'              # Query
@@ -73,17 +75,17 @@ def insert_info_checkout(driver):
     agreement_xpath = '//*[@id="cart-cc"]/fieldset/p/label/div/ins' #Click
     process_xpath   = '//*[@id="pay"]/input'                #Click
 
-    driver.find_element_by_xpath(full_name_xpath).send_keys(full_name)
-    driver.find_element_by_xpath(email_xpath).send_keys(email)
-    driver.find_element_by_xpath(tele_xpath).send_keys(tele)
-    driver.find_element_by_xpath(addr_xpath).send_keys(addr)
-    driver.find_element_by_xpath(city_xpath).send_keys(city)
-    driver.find_element_by_xpath(postcode_xpath).send_keys(post_code)
-    driver.find_element_by_xpath(country_xpath).send_keys(country)
-    driver.find_element_by_xpath(card_xpath).send_keys(card_info)
-    driver.find_element_by_xpath(card_month_xpath).send_keys(card_month)
-    driver.find_element_by_xpath(card_year_xpath).send_keys(card_year)
-    driver.find_element_by_xpath(card_cvv_xpath).send_keys(card_cvv)
+    driver.find_element_by_xpath(full_name_xpath).send_keys(FULL_NAME)
+    driver.find_element_by_xpath(email_xpath).send_keys(EMAIL)
+    driver.find_element_by_xpath(tele_xpath).send_keys(TELE)
+    driver.find_element_by_xpath(addr_xpath).send_keys(ADDR)
+    driver.find_element_by_xpath(city_xpath).send_keys(CITY)
+    driver.find_element_by_xpath(postcode_xpath).send_keys(POST_CODE)
+    driver.find_element_by_xpath(country_xpath).send_keys(COUNTRY)
+    driver.find_element_by_xpath(card_xpath).send_keys(CARD_INFO)
+    driver.find_element_by_xpath(card_month_xpath).send_keys(CARD_MONTH)
+    driver.find_element_by_xpath(card_year_xpath).send_keys(CARD_YEAR)
+    driver.find_element_by_xpath(card_cvv_xpath).send_keys(CARD_CVV)
     driver.find_element_by_xpath(agreement_xpath).click()
     driver.find_element_by_xpath(process_xpath).click()
 
@@ -112,30 +114,27 @@ def find_item(item, regex):
             product = get_page(query)
 
             if re.findall(regex, str(product)):
+                print("Item found!")
                 init_checkout(query)
         except:
-            print("Sold Out!")
+            print("Item Sold Out!")
 
         item.task_done()
 
 def init_checkout(query):
-    print("Item found: ")
-    print(URL + query)
     driver = init_driver(URL + query)
     driver = add_to_cart(driver)
     driver = checkout(driver)
     insert_info_checkout(driver)
 
 def init():
-    regex = "Jean Paul"
-    rd = "04/11/2019"
     home_page = get_page()
-    shop_page = get_assortment(home_page, 1) # Second parameter one fetches only new releases
+    shop_page = get_assortment(home_page, 0) # Second parameter one fetches only new releases
 
     q = queue.Queue(maxsize=0)
 
     for i in range(THREAD_NUM):
-        worker = Thread(target=find_item, args=(q, regex,))
+        worker = Thread(target=find_item, args=(q, ITEM,))
         worker.setDaemon(True)
         worker.start()
 
