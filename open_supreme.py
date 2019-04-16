@@ -16,7 +16,11 @@ from bs4 import BeautifulSoup as soup
 
 debug = 0
 url = "https://www.supremenewyork.com/shop"
+RELEASE_DATE = datetime.datetime.now().strftime("%m/%d/%Y")
+#RELEASE_DATE = "04/11/2019"
 
+def get_date():
+    return datetime.datetime.now().strftime("%m/%d/%Y")
 
 def init_driver(url):
     driver = webdriver.Chrome()
@@ -118,41 +122,6 @@ def find_item(assortment, regex):
 
         count += 1
 
-def await_release_threaded(release_time=None):
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(init, 'date', run_date = release_time)
-
-    scheduler.start()
-    print("Executes at:", release_time)
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
-    try:
-        # This is here to simulate application activity (which keeps the main thread alive).
-        while True:
-            time.sleep(0.01)
-    except (KeyboardInterrupt, SystemExit):
-        # Not strictly necessary if daemonic mode is enabled but should be done if possible
-        scheduler.shutdown()
-
-
-def find_item_threaded(assortment, regex):
-    count = 0
-    for i in assortment:
-        print("Searching for item... (" + str(count) + "/" + str(len(assortment)) + ")")
-        curr_query   = get_query(i)
-        curr_product = get_page(curr_query)
-
-        if re.findall(regex, str(curr_product)):
-            print("Item found: ", get_product_title(curr_product))
-            print(url + curr_query)
-            driver = init_driver(url + curr_query)
-            driver = add_to_cart(driver)
-            driver = checkout(driver)
-            insert_info_checkout(driver)
-            break
-
-        count += 1
-
 def init():
     start = datetime.datetime.now()
     #init_driver(url) # Might not be necessary, means to not be locked out of client
@@ -171,7 +140,7 @@ def init():
 def main():
     # Y/M/D/H/M/S
     #release_time = datetime.datetime(2019, 4, 11, 22, 43, 45)
-    
+    #2019-04-16
     await_release()
 
 main()
