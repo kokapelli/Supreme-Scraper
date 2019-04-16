@@ -4,6 +4,8 @@ debug = 0
 url = "https://www.supremenewyork.com/shop"
 url2 = "https://www.supremenewyork.com/shop/all"
 
+#RELEASE_DATE = datetime.datetime.now().strftime("%m/%d/%Y")
+
 # Site Specific
 def get_page(query=""):
     client = urlopen(url + query)
@@ -19,7 +21,8 @@ def get_assortment(parsed_page, release=0):
     shop_list = parsed_page.find("ul", {"id": "shop-scroller"})
     items = []
     for i in shop_list.find_all('li'):
-        items.append(i)
+        if(release == 1 and get_tag(i) != None):
+            items.append(i)
 
     return items
 
