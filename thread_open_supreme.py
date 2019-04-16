@@ -15,6 +15,10 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup as soup
 import queue as queue
 
+
+# TODO
+# Pool threads before execution to avoid creation overhead
+
 URL = "https://www.supremenewyork.com/shop"
 THREAD_NUM = 8
 ITEM = "Leather Tanker Jacket"
@@ -31,15 +35,9 @@ CARD_MONTH      = '10'
 CARD_YEAR       = '20'
 CARD_CVV        = '930'
 
-
-
-START_TIME = datetime.datetime.now()
-
-
 def init_driver(url):
     driver = webdriver.Chrome()
     driver.get(url)
-
     return driver
 
 def close_driver(driver):
@@ -48,19 +46,14 @@ def close_driver(driver):
 def add_to_cart(driver):
     button = driver.find_element_by_xpath('//*[@id="add-remove-buttons"]/input')
     button.click()
-    print("Added item to basket")
-
     return driver
 
 def checkout(driver):
-    wait_button = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cart"]/a[2]')))
-    wait_button.click() 
-    print("Entered Checkout")
-
+    wait_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cart"]/a[2]')))
+    wait_button.click()
     return driver
 
 def insert_info_checkout(driver):
-
     full_name_xpath = '//*[@id="order_billing_name"]'       # Query
     email_xpath     = '//*[@id="order_email"]'              # Query
     tele_xpath      = '//*[@id="order_tel"]'                # Query
@@ -89,24 +82,6 @@ def insert_info_checkout(driver):
     driver.find_element_by_xpath(agreement_xpath).click()
     driver.find_element_by_xpath(process_xpath).click()
 
-    print("Personal Information Inserted")
-
-def await_release(release_time=None):
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(init, 'date', run_date = release_time)
-
-    scheduler.start()
-    print("Executes at:", release_time)
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
-    try:
-        # This is here to simulate application activity (which keeps the main thread alive).
-        while True:
-            time.sleep(0.01)
-    except (KeyboardInterrupt, SystemExit):
-        # Not strictly necessary if daemonic mode is enabled but should be done if possible
-        scheduler.shutdown()
-
 def find_item(item, regex):
     while True: 
         try:
@@ -127,7 +102,21 @@ def init_checkout(query):
     driver = checkout(driver)
     insert_info_checkout(driver)
 
+def await_release(release_time=None):
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(init, 'date', run_date = release_time)
+    scheduler.start()
+    print("Executes at:", release_time)
+
+    try:
+        while True:
+            time.sleep(0.01)
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+
 def init():
+    start = datetime.datetime.now()
+    
     home_page = get_page()
     shop_page = get_assortment(home_page, 0) # Second parameter one fetches only new releases
 
@@ -144,14 +133,14 @@ def init():
     q.join()
     end = datetime.datetime.now()
 
-    process_time = end - START_TIME
+    process_time = end - start
     print("The Process took: ", process_time)
-    time.sleep(5)
+    time.sleep(1)
 
 def main():
     # Set release Date/Time
     # Y/M/D/H/M/S
-    #release_time = datetime.datetime(2019, 4, 11, 22, 43, 45)
+    #release_time = datetime.datetime(2019, 4, 16, 16, 39, 10)
     
     # Create and assign names
     await_release()
